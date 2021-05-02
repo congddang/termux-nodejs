@@ -67,22 +67,11 @@ let table = require("table");
         await page.waitForTimeout(250);
 
     //---------------------Result---------------------//
-    console.log(table.table(makeTableData(buyVND,sellKRW,4,"VND->KRW")));
-    console.log(table.table(makeTableData(sellVND,buyKRW,4,"KRW->VND")));
+    console.log(table.table(makeTableData2(buyVND,sellKRW,4,"VND->KRW")));
+    console.log(table.table(makeTableData2(sellVND,buyKRW,4,"KRW->VND")));
     browser.close();
     process.exit(0);
 })();
-
-
-async function readFirstPrice(page) {
-    return page.evaluate(() => {
-      let data = [];
-      let elements = document.querySelectorAll('main > div.css-16g55fu > div > div.css-vurnku > div');
-      let price = elements[0].innerText.split('\n')[4].replace(/,/g, '');
-      data.push(parseFloat(price));
-      return data;
-    });
-  }
 
 async function readPagePrices(page) {
     return page.evaluate(() => {
@@ -90,7 +79,10 @@ async function readPagePrices(page) {
       let elements = document.querySelectorAll('main > div.css-16g55fu > div > div.css-vurnku > div');
       for(let i=0;i<elements.length;i++) {
         let price = elements[i].innerText.split('\n')[4].replace(/,/g, '');
-        data.push(parseFloat(price));
+        let limit = elements[i].innerText.split('\n')[9];
+        let limit1 = limit.split(' - ')[0].split('.')[0];
+        let limit2 = limit.split(' - ')[1].split('.')[0];
+        data.push([parseFloat(price),limit1,limit2]);
       }
       return data;
     });
@@ -101,8 +93,22 @@ function makeTableData(buyPrice, sellPrice, N, label) {
     for(let i=0; i<N+1; i++) {
       T[i] = new Array(N+1);
       for(let j=0; j<N+1; j++) {
-        T[i][j] = i==0 ? ( j==0 ? label : buyPrice[j-1] ) : (j==0 ? sellPrice[i-1] : (buyPrice[j-1]/sellPrice[i-1]).toFixed(3));
+        T[i][j] = i==0 ? ( j==0 ? label : buyPrice[j-1][0]) 
+          : (j==0 ? sellPrice[i-1][0] : (buyPrice[j-1][0]/sellPrice[i-1][0]).toFixed(3));
       }
     }
     return T;
   }
+
+function makeTableData2(buyPrice, sellPrice, N, label) {
+    let T = new Array(N+3);
+    for(let i=0; i<N+3; i++) {
+      T[i] = new Array(N+3);
+      for(let j=0; j<N+3; j++) {
+        T[i][j] = i<3 ? ( j==1 ? (i==1 ? label : '') : (j>=3 ? buyPrice[j-3][i] : '')) 
+          : (j<3 ? sellPrice[i-3][j] : (buyPrice[j-3][0]/sellPrice[i-3][0]).toFixed(3));
+      }
+    }
+    return T;
+  }
+
