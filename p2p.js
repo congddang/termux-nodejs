@@ -3,7 +3,7 @@ let table = require("table");
 
 (async () => {  // Main
 
-    // Connect to binance
+    //---------------------Connect to binance---------------------//
     console.log('Connecting...');
     const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox","--disable-gpu"] });
     const page = await browser.newPage();
@@ -13,43 +13,62 @@ let table = require("table");
 
     await page.goto('https://p2p.binance.com/en');
 
-    // Select crypto currency
+    //---------------------Select crypto currency---------------------//
     // console.log('Select crypto currency...');
     tickerIndexes = 1; // USDT: 1, BTC: 2, BNB: 3, BUSD: 4, ETH: 5, DAI: 6
     await page.waitForSelector(`main > div.css-1u2nsrt > div > div > div.css-8f6za > div > div:nth-child(${tickerIndexes})`);
     await page.click(`main > div.css-1u2nsrt > div > div > div.css-8f6za > div > div:nth-child(${tickerIndexes})`);
     await page.waitForSelector(`main > div.css-16g55fu > div > div.css-vurnku`);
 
-    // Select fiat for buy
+    //---------------------Select fiat for buy---------------------//
     // console.log('Select fiat for buy...');
     await page.click('main > div.css-1u2nsrt > div > div > div.css-1yl7p9 > div > div.css-xbxtuo')
     await page.waitForSelector(`main > div.css-16g55fu > div > div.css-vurnku`);
     
+    await page.click('#C2Cfiatfilter_searhbox_fiat');
+    await page.waitForSelector(`#VND`);
+    await page.click(`#VND`);
+    await page.waitForSelector(`main > div.css-16g55fu > div > div.css-vurnku`);
+        // Reading data
+        await page.waitForTimeout(500);
+        buyVND = await readPagePrices(page);
+        await page.waitForTimeout(250);
+
+    await page.click('#C2Cfiatfilter_searhbox_fiat');
+    await page.waitForSelector(`#KRW`);
+    await page.click(`#KRW`);
+    await page.waitForSelector(`main > div.css-16g55fu > div > div.css-vurnku`);
+        // Reading data
+        await page.waitForTimeout(500);
+        buyKRW = await readPagePrices(page);
+        await page.waitForTimeout(250);
+
+    //---------------------Select fiat for sell---------------------//
+    // console.log('Select fiat for sell...');
+    await page.click('main > div.css-1u2nsrt > div > div > div.css-1yl7p9 > div > div.css-yxrkwa')
+    await page.waitForSelector(`main > div.css-16g55fu > div > div.css-vurnku`);
+    
+    await page.click('#C2Cfiatfilter_searhbox_fiat');
+    await page.waitForSelector(`#KRW`);
+    await page.click(`#KRW`);
+    await page.waitForSelector(`main > div.css-16g55fu > div > div.css-vurnku`);
+        // Reading data
+        await page.waitForTimeout(500);
+        sellKRW = await readPagePrices(page);
+        await page.waitForTimeout(250);
 
     await page.click('#C2Cfiatfilter_searhbox_fiat');
     await page.waitForSelector(`#VND`);
     await page.click(`#VND`);
     await page.waitForSelector(`main > div.css-16g55fu > div > div.css-vurnku`);
-    await page.waitForTimeout(200);
         // Reading data
-        buyPrice = await readPagePrices(page);
+        await page.waitForTimeout(500);
+        sellVND = await readPagePrices(page);
+        await page.waitForTimeout(250);
 
-    // Select fiat for sell
-    // console.log('Select fiat for sell...');
-    await page.click('main > div.css-1u2nsrt > div > div > div.css-1yl7p9 > div > div.css-yxrkwa')
-    await page.waitForSelector(`main > div.css-16g55fu > div > div.css-vurnku`);
-    
-    // await page.waitForSelector('#C2Cfiatfilter_searhbox_fiat');
-    await page.click('#C2Cfiatfilter_searhbox_fiat');
-    await page.waitForSelector(`#KRW`);
-    await page.click(`#KRW`);
-    await page.waitForSelector(`main > div.css-16g55fu > div > div.css-vurnku`);
-    await page.waitForTimeout(200);
-        // Reading data
-        sellPrice = await readPagePrices(page);
-
-    // Result
-    console.log(table.table(makeTableData(buyPrice,sellPrice,5,"VND->KRW")));
+    //---------------------Result---------------------//
+    console.log(table.table(makeTableData(buyVND,sellKRW,4,"VND->KRW")));
+    console.log(table.table(makeTableData(sellVND,buyKRW,4,"KRW->VND")));
     browser.close();
     process.exit(0);
 })();
@@ -77,7 +96,6 @@ async function readPagePrices(page) {
     });
   }
 
-
 function makeTableData(buyPrice, sellPrice, N, label) {
     let T = new Array(N+1);
     for(let i=0; i<N+1; i++) {
@@ -88,4 +106,3 @@ function makeTableData(buyPrice, sellPrice, N, label) {
     }
     return T;
   }
-
