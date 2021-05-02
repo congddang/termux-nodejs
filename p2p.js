@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const colors = require('colors');
 let table = require("table");
 
 (async () => {  // Main
@@ -67,8 +68,8 @@ let table = require("table");
         await page.waitForTimeout(250);
 
     //---------------------Result---------------------//
-    console.log(table.table(makeTableData2(buyVND,sellKRW,4,"VND->KRW")));
-    console.log(table.table(makeTableData2(sellVND,buyKRW,4,"KRW->VND")));
+    console.log(table.table(makeTableData2(buyVND,sellKRW,5,"VND->KRW")));
+    console.log(table.table(makeTableData2(sellVND,buyKRW,5,"KRW->VND")));
     browser.close();
     process.exit(0);
 })();
@@ -106,7 +107,7 @@ function makeTableData2(buyPrice, sellPrice, N, label) {
       T[i] = new Array(N+3);
       for(let j=0; j<N+3; j++) {
         T[i][j] = i<3 ? ( j==1 ? (i==1 ? label : '') : (j>=3 ? buyPrice[j-3][i] : '')) 
-          : (j<3 ? sellPrice[i-3][j] : (buyPrice[j-3][0]/sellPrice[i-3][0]).toFixed(3));
+          : (j<3 ? sellPrice[i-3][j] : (buyPrice[j-3][0]/sellPrice[i-3][0]).toFixed(3).yellow);
       }
     }
     return T;
