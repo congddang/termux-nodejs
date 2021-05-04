@@ -5,7 +5,7 @@ let table = require("table");
 (async () => {  // Main
 
     //---------------------Connect to binance---------------------//
-    console.log('Connecting...');
+    console.log('Connecting...' + getDateTime());
     const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox","--disable-gpu"] });
     const page = await browser.newPage();
     await page.setViewport({width: 1400, height: 800});
@@ -68,8 +68,8 @@ let table = require("table");
         await page.waitForTimeout(250);
 
     //---------------------Result---------------------//
-    console.log(table.table(makeTableData2(buyVND,sellKRW,5,"VND->KRW")));
-    console.log(table.table(makeTableData2(sellVND,buyKRW,5,"KRW->VND")));
+    // console.log(table.table(makeTableData2(sellVND,buyKRW,4,"KRW->VND")));
+    console.log(table.table(makeTableData2(buyVND,sellKRW,4,"VND->KRW")));
     browser.close();
     process.exit(0);
 })();
@@ -113,3 +113,18 @@ function makeTableData2(buyPrice, sellPrice, N, label) {
     return T;
   }
 
+function getDateTime() {
+    var date = new Date();
+    var hour = date.getHours();
+    hour = (hour < 10 ? "0" : "") + hour;
+    var min  = date.getMinutes();
+    min = (min < 10 ? "0" : "") + min;
+    var sec  = date.getSeconds();
+    sec = (sec < 10 ? "0" : "") + sec;
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    month = (month < 10 ? "0" : "") + month;
+    var day  = date.getDate();
+    day = (day < 10 ? "0" : "") + day;
+    return year + ":" + month + ":" + day + " - " + hour + ":" + min + ":" + sec;
+}
